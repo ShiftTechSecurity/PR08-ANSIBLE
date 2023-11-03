@@ -4,7 +4,7 @@ apt update -y && apt upgrade -y
 apt install sudo man tree net-tools curl git -y
 
 # Installation de Ansible, et la dépendance sshpass
-apt install ansible sshpass python3 python3-mysqldb -y
+apt install ansible sshpass python3 python3-mysqldb python3-pymysql -y
 
 # Installation du plugin ansible "community.mysql" pour MariaDB
 ansible-galaxy collection install community.mysql
@@ -42,16 +42,11 @@ echo -e "[glpiserver]\nSRV-GLPI" | tee -a /etc/ansible/hosts
 # Création des répertoires de rôles
 ansible-galaxy init /etc/ansible/roles/create-user-ssh
 ansible-galaxy init /etc/ansible/roles/update-server
+ansible-galaxy init /etc/ansible/roles/install-tools
 ansible-galaxy init /etc/ansible/roles/install-lamp
 ansible-galaxy init /etc/ansible/roles/secure-web-server
-ansible-galaxy init /etc/ansible/roles/test-secure-web-server
 ansible-galaxy init /etc/ansible/roles/install-glpi
-ansible-galaxy init /etc/ansible/roles/test-glpi
-ansible-galaxy init /etc/ansible/roles/backup-server
-ansible-galaxy init /etc/ansible/roles/update-lamp
-ansible-galaxy init /etc/ansible/roles/update-glpi
-ansible-galaxy init /etc/ansible/roles/update-secure-server
-ansible-galaxy init /etc/ansible/roles/install-tools
+ansible-galaxy init /etc/ansible/roles/activate-glpi-web
 
 # Création des playbooks
 touch ./playbooks/{prepare-web-server.yml,install-glpi.yml,update-glpi.yml}
@@ -75,6 +70,3 @@ ansible-playbook -e @/etc/ansible/clients/client1.yml prepare-web-server.yml -bk
 
 # Execute the deploy-glpi playbook
 ansible-playbook -e @/etc/ansible/clients/client1.yml install-glpi.yml -bkK
-
-# Execute the update-glpi playbook
-ansible-playbook update-glpi.yml -k

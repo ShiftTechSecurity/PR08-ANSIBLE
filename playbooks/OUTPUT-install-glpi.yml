@@ -1,0 +1,61 @@
+
+ansible@SRV-ANSIBLE:/etc/ansible/playbooks$ ansible-playbook -e @/etc/ansible/clients/client1.yml install-glpi.yml -k
+SSH password:
+
+PLAY [install-glpi] **********************************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-glpi : Creation de l'utilisateur "client_username"] ************************************************************************************************************
+[DEPRECATION WARNING]: Encryption using the Python crypt module is deprecated. The Python crypt module is deprecated and will be removed from Python 3.13. Install the
+passlib library for continued encryption functionality. This feature will be removed in version 2.17. Deprecation warnings can be disabled by setting
+deprecation_warnings=False in ansible.cfg.
+changed: [SRV-GLPI]
+
+TASK [install-glpi : Ajout de l'utilisateur "client_username" aux utilisateurs sudo "NO PASSWORD"] ***************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-glpi : Copie du script de configuration de la base de donnée MariaDB] ******************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-glpi : Exécution du script de configuration] *******************************************************************************************************************
+changed: [SRV-GLPI]
+
+TASK [install-glpi : Téléchargement de l'archive GLPI Version 10.0.10] *******************************************************************************************************
+changed: [SRV-GLPI]
+
+TASK [install-glpi : Décompression de l'archive GLPI et configuration du propriétaire et des droits] *************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-glpi : Installation de GLPI] ***********************************************************************************************************************************
+changed: [SRV-GLPI]
+
+TASK [install-glpi : Suppresion de l'archive de GLPI] ************************************************************************************************************************
+changed: [SRV-GLPI]
+
+TASK [activate-glpi-web : Création d'un répertoire pour les paires de clés et les certificats TLS] ***************************************************************************
+ok: [SRV-GLPI] => (item=csr)
+ok: [SRV-GLPI] => (item=cert)
+ok: [SRV-GLPI] => (item=private)
+
+TASK [activate-glpi-web : Génération d'une clé RSA pour le certificat TLS] ***************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [activate-glpi-web : Génération d'un certificat OpenSSL] ****************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [activate-glpi-web : Génération d'un certificat OpenSSL autosigné] ******************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [activate-glpi-web : Copie du template "client_url.conf"] ***************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [activate-glpi-web : Activation du site web "client_url"] ***************************************************************************************************************
+changed: [SRV-GLPI]
+
+TASK [activate-glpi-web : Activation du module SSL de Apache2] ***************************************************************************************************************
+ok: [SRV-GLPI]
+
+PLAY RECAP *******************************************************************************************************************************************************************
+SRV-GLPI                   : ok=16   changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

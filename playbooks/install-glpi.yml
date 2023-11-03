@@ -5,4 +5,4 @@
 
   roles:
     - install-glpi
-    - test-glpi
+    - activate-glpi-web
