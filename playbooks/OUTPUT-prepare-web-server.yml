@@ -1,0 +1,90 @@
+root@PR08-DEBIAN-1:/etc/ansible/playbooks# ansible-playbook -e @/etc/ansible/clients/client1.yml prepare-web-server.yml -bkK
+SSH password:
+BECOME password[defaults to SSH password]:
+
+PLAY [create-user-ssh] *******************************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [create-user-ssh : Creation de l'utilisateur "ansible"] *****************************************************************************************************************
+changed: [SRV-GLPI]
+
+TASK [create-user-ssh : Ajout de l'utilisateur "ansible" aux utilisateurs sudo "NO PASSWORD"] ********************************************************************************
+ok: [SRV-GLPI]
+
+TASK [create-user-ssh : Génération d'une paire de clé SSH pour les serveurs clients sur le controller node] ******************************************************************
+ok: [SRV-GLPI -> localhost]
+
+TASK [create-user-ssh : Changement de propriétaire de la paire de clés SSH sur le controller node] ***************************************************************************
+changed: [SRV-GLPI -> localhost]
+
+TASK [create-user-ssh : Changement de propriétaire de la paire de clés SSH] **************************************************************************************************
+ok: [SRV-GLPI -> localhost]
+
+TASK [create-user-ssh : Déploiement de la clé SSH ver le serveur client] *****************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [create-user-ssh : Test de connexion avec la clé SSH] *******************************************************************************************************************
+ok: [SRV-GLPI]
+
+PLAY [prepare-web-server] ****************************************************************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [update-server : update-server] *****************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-tools : Install "man"] *****************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-tools : Install "tree"] ****************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-tools : Install "net-tools"] ***********************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-tools : Install "curl"] ****************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-lamp : Install "Apache2"] **************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-lamp : Install "MariaDB"] **************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [install-lamp : Install "PHP"] ******************************************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [secure-web-server : Installation du service "iptables"] ****************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [secure-web-server : Installation du service "FAIL2BAN"] ****************************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [secure-web-server : Configuration des règles de filtrage "iptables"] ***************************************************************************************************
+changed: [SRV-GLPI] => (item=iptables -A INPUT -p tcp --dport 22 -j ACCEPT)
+changed: [SRV-GLPI] => (item=iptables -A INPUT -p tcp --dport 80 -j ACCEPT)
+changed: [SRV-GLPI] => (item=iptables -A INPUT -p tcp --dport 443 -j ACCEPT)
+
+TASK [secure-web-server : Sauvegarde des règles de "iptables" dans le fichier "rules.v4"] ************************************************************************************
+changed: [SRV-GLPI]
+
+TASK [secure-web-server : Configuration de la restauration des règles "rules.v4" avec "iptables-persistent"] *****************************************************************
+changed: [SRV-GLPI]
+
+TASK [secure-web-server : Démarrage du service "iptables-persistent"] ********************************************************************************************************
+ok: [SRV-GLPI]
+
+TASK [secure-web-server : Copie du template "jail.conf" vers le répertoire "fail2ban" distant] *******************************************************************************
+ok: [SRV-GLPI]
+
+TASK [secure-web-server : Configuration du backend dans le fichier "jail.conf" de "fail2ban"] ********************************************************************************
+changed: [SRV-GLPI]
+
+TASK [secure-web-server : Démarrage du service "fail2ban"] *******************************************************************************************************************
+ok: [SRV-GLPI]
+
+PLAY RECAP *******************************************************************************************************************************************************************
+SRV-GLPI                   : ok=26   changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

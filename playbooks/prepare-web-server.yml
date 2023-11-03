@@ -1,0 +1,18 @@
+---
+- name: create-user-ssh
+  remote_user: tristan
+  hosts: webserver
+
+  roles:
+    - create-user-ssh
+
+- name: prepare-web-server
+  remote_user: ansible
+  hosts: webserver
+
+  roles:
+    - update-server
+    - install-tools
+    - install-lamp
+    - secure-web-server
+    - test-secure-web-server

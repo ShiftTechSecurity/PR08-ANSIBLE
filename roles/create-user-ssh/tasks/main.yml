@@ -1,0 +1,53 @@
+---
+# tasks file for roles/create-user-ssh
+- name: Creation de l'utilisateur "ansible"
+  ansible.builtin.user:
+    name: ansible
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+    password: "{{ 'Azerty77' | password_hash('sha512') }}"
+  become: yes
+
+- name: Ajout de l'utilisateur "ansible" aux utilisateurs sudo "NO PASSWORD"
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/ansible"
+    content: "ansible  ALL=(ALL)  NOPASSWD: ALL"
+  become: yes
+
+- name: Génération d'une paire de clé SSH pour les serveurs clients sur le controller node
+  ansible.builtin.openssh_keypair:
+    path: /home/ansible/.ssh/{{ client_name }}
+    type: ecdsa
+    size: 521
+    state: present
+    force: no
+  run_once: yes
+  delegate_to: localhost
+
+- name: Changement de propriétaire de la paire de clés SSH sur le controller node
+  ansible.builtin.command:
+    cmd: chown -R ansible:ansible /home/ansible/.ssh/{{ client_name }} /home/ansible/.ssh/{{ client_name }}.pub
+  become: yes
+  run_once: yes
+  delegate_to: localhost
+
+- name: Changement de propriétaire de la paire de clés SSH
+  ansible.builtin.file:
+    path: /home/ansible/.ssh
+    owner: ansible
+    group: ansible
+    recurse: yes
+  become: yes
+  delegate_to: localhost
+
+- name: Déploiement de la clé SSH ver le serveur client
+  ansible.builtin.authorized_key:
+    user: ansible
+    key: "{{ lookup('file', '/home/ansible/.ssh/' ~ client_name ~ '.pub') }}"
+    state: present
+  become: yes
+
+- name: Test de connexion avec la clé SSH
+  ansible.builtin.ping:
+  remote_user: ansible

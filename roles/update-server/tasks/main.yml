@@ -1,0 +1,7 @@
+---
+# tasks file for /etc/ansible/roles/update-server
+- name: update-server
+  ansible.builtin.apt:
+    update_cache: yes
+    force_apt_get: yes
+    cache_valid_time: 3600

@@ -1,0 +1,56 @@
+---
+# tasks file for /etc/ansible/roles/secure-web-server
+- name: Installation du service "iptables"
+  ansible.builtin.apt:
+    name:
+      - iptables
+      - iptables-persistent
+    state: present
+  become: yes
+
+- name: Installation du service "FAIL2BAN"
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+  become: yes
+
+- name: Configuration des règles de filtrage "iptables"
+  ansible.builtin.command:
+    cmd: "{{ item }}"
+  with_items:
+    - "iptables -A INPUT -p tcp --dport 22 -j ACCEPT"
+    - "iptables -A INPUT -p tcp --dport 80 -j ACCEPT"
+    - "iptables -A INPUT -p tcp --dport 443 -j ACCEPT"
+  become: yes
+
+- name: Sauvegarde des règles de "iptables" dans le fichier "rules.v4"
+  ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
+  become: yes
+
+- name: Configuration de la restauration des règles "rules.v4" avec "iptables-persistent"
+  ansible.builtin.shell: iptables-restore < /etc/iptables/rules.v4
+  become: yes
+
+- name: Démarrage du service "iptables-persistent"
+  ansible.builtin.service:
+    name: netfilter-persistent
+    state: started
+  become: yes
+
+- name: Copie du template "jail.conf" vers le répertoire "fail2ban" distant
+  ansible.builtin.template:
+    src: custom.conf
+    dest: /etc/fail2ban/jail.d/custom.conf
+    mode: '0644'
+  become: yes
+
+- name: Configuration du backend dans le fichier "jail.conf" de "fail2ban"
+  ansible.builtin.shell:
+    cmd: "sed -i 's/backend = auto/backend = systemd/' /etc/fail2ban/jail.conf"
+  become: yes
+
+- name: Démarrage du service "fail2ban"
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+  become: yes

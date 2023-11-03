@@ -1,0 +1,25 @@
+---
+# tasks file for /etc/ansible/roles/install-tools
+- name: Install "man"
+  ansible.builtin.apt:
+    name: man
+    state: present
+  become: yes
+
+- name: Install "tree"
+  ansible.builtin.apt:
+    name: tree
+    state: present
+  become: yes
+
+- name: Install "net-tools"
+  ansible.builtin.apt:
+    name: net-tools
+    state: present
+  become: yes
+
+- name: Install "curl"
+  ansible.builtin.apt:
+    name: curl
+    state: present
+  become: yes

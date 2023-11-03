@@ -1,0 +1,87 @@
+---
+# tasks file for /etc/ansible/roles/install-glpi
+- name: Creation de l'utilisateur "client_username"
+  ansible.builtin.user:
+    name: "{{ client_username }}"
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+    password: "{{ client_password | password_hash('sha512') }}"
+  become: yes
+
+- name: Ajout de l'utilisateur "client_username" aux utilisateurs sudo "NO PASSWORD"
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ client_username }}"
+    content: "{{ client_username }}  ALL=(ALL)  NOPASSWD: ALL"
+  become: yes
+
+- name: Création de la base de donnée "bdd_glpi"
+  ansible.builtin.mysql_db:
+    name: bdd_glpi
+    state: present
+    login_user: "{{ client_username }}"
+    login_password: "{{ client_password }}"
+  become: yes
+
+- name: Attribution des droits à "client_username" pour la base de données "bdd_glpi"
+  ansible.builtin.mysql_user:
+    name: "{{ client_username }}"
+    host: localhost
+    password: "{{ client_password }}"
+    priv: "bdd_glpi.*:ALL"
+    append_privs: yes
+  become: yes
+
+- name: Téléchargement de l'archive GLPI Version 10.0.10
+  ansible.builtin.get_url:
+    url: https://github.com/glpi-project/glpi/releases/download/10.0.10/glpi-10.0.10.tgz
+    dest: /tmp/
+
+- name: Décompression de l'archive GLPI et configuration du propriétaire et des droits
+  ansible.builtin.unarchive:
+    src: /tmp/glpi-10.0.10.tgz
+    dest: /var/www/
+    owner: www-data
+    group: www-data
+    mode: '0755'
+    remote_src: yes
+  become: yes
+
+- name: Installation de GLPI
+  ansible.builtin.command:
+    "php bin/console -n db:install -H localhost -P 3306 -d bdd_glpi -u {{ client_username }} -p {{ client_password }} -L fr_FR --reconfigure --force"
+  args:
+    chdir: /var/www/glpi
+  become: yes
+
+- name: Suppresion de l'archive de GLPI
+  ansible.builtin.file:
+    path: /tmp/glpi-10.0.10.tgz 
+    state: absent  
+  become: yes
+
+- name: Création d'un répertoire pour les paires de clés et les certificats TLS
+  ansible.builtin.file:
+    path: /etc/ssl/csr
+    state: directory
+    mode: '0755'
+
+- name: Génération d'une clé RSA pour le certificat TLS
+  community.crypto.openssl_privatekey:
+    path: /etc/ssl/private/glpi.pem"
+
+- name: Génération d'un certificat OpenSSL
+  community.crypto.openssl_csr:
+    path: /etc/ssl/csr/glpi.csr
+    privatekey_path: /etc/ssl/private/glpi.pem"
+    common_name: "www.{{ client_url }}.com"
+    country_name: FR
+    organization_name: "ADRAR NUMERIQUE"
+    email_address: admin@adrar-numerique.lan
+
+- name: Génération d'uun certificat OpenSSL autosigné
+  community.crypto.x509_certificate:
+    path: "/etc/ssl/csr/glpi.crt"
+    privatekey_path: "/etc/ssl/csr/glpi.pem"
+    csr_path: "/etc/ssl/csr/glpi.csr"
+    provider: selfsigned

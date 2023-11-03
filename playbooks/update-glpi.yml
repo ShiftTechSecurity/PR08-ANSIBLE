@@ -1,0 +1,14 @@
+---
+- name: update-glpi
+  hosts : glpiservers
+  remote_user: ansible
+  hosts: glpiservers
+
+  roles:
+    - backup-server
+    - update-server
+    - update-lamp
+    - update-glpi
+    - update-secure-web-server
+    - test-secure-web-server
+    - test-glpi

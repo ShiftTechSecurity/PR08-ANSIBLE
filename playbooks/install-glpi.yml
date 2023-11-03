@@ -1,0 +1,8 @@
+---
+- name: install-glpi
+  hosts : glpiserver
+  remote_user: ansible
+
+  roles:
+    - install-glpi
+    - test-glpi
