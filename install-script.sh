@@ -1,10 +1,10 @@
 #!/bin/bash
 # Installation de Ansible, sshpass, sudo, man, tree, et net-tools depuis root
 apt update -y && apt upgrade -y
-apt install sudo man tree net-tools curl -y
+apt install sudo man tree net-tools curl git -y
 
 # Installation de Ansible, et la dépendance sshpass
-apt install ansible sshpass mysqldb -y
+apt install ansible sshpass python3 python3-mysqldb -y
 
 # Installation du plugin ansible "community.mysql" pour MariaDB
 ansible-galaxy collection install community.mysql
@@ -59,6 +59,13 @@ touch ./playbooks/{prepare-web-server.yml,install-glpi.yml,update-glpi.yml}
 # Création et configuration d'un fichier client "client1.yml"
 touch /etc/ansible/clients/client1.yml
 echo -e "client_name: "entreprise1"\nclient_username: "client1"\nclient_password: "client1"\nclient_url: "client1.glpi-server.lan"\n" | tee -a /etc/ansible/clients/client1.yml
+
+# Clonage du repository Github
+mkdir /etc/ansible/github
+cd /etc/ansible/github
+git clone https://github.com/ShiftTechSecurity/PR08-ANSIBLE.git
+cp -r /etc/ansible/github/PR08-ANSIBLE/* /etc/ansible
+rm -r /etc/ansible/github
 
 # Changement d'utilisateur
 su ansible
