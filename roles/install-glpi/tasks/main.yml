@@ -15,7 +15,7 @@
     content: "{{ client_username }}  ALL=(ALL)  NOPASSWD: ALL"
   become: yes
 
-- name: Copie du script de configuration de la base de donnée MariaDB
+- name: Copie du script de configuration de la base de données MariaDB
   ansible.builtin.template:
     src: /etc/ansible/roles/install-glpi/templates/mariadb.sql
     dest: /home/ansible/mariadb.sql
