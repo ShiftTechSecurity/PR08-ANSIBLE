@@ -1,0 +1,6 @@
+---
+# handlers file for /etc/ansible/roles/activate-glpi-web
+- name: restart-apache2
+  ansible.builtin.service:
+    name: apache2
+    state: restarted

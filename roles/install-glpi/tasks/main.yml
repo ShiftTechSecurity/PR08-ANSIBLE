@@ -15,21 +15,15 @@
     content: "{{ client_username }}  ALL=(ALL)  NOPASSWD: ALL"
   become: yes
 
-- name: Création de la base de donnée "bdd_glpi"
-  ansible.builtin.mysql_db:
-    name: bdd_glpi
-    state: present
-    login_user: "{{ client_username }}"
-    login_password: "{{ client_password }}"
+- name: Copie du script de configuration de la base de donnée MariaDB
+  ansible.builtin.template:
+    src: /etc/ansible/roles/install-glpi/templates/mariadb.sql
+    dest: /home/ansible/mariadb.sql
   become: yes
 
-- name: Attribution des droits à "client_username" pour la base de données "bdd_glpi"
-  ansible.builtin.mysql_user:
-    name: "{{ client_username }}"
-    host: localhost
-    password: "{{ client_password }}"
-    priv: "bdd_glpi.*:ALL"
-    append_privs: yes
+- name: Exécution du script de configuration
+  ansible.builtin.shell:
+    cmd: "mysql < /home/ansible/mariadb.sql"
   become: yes
 
 - name: Téléchargement de l'archive GLPI Version 10.0.10
@@ -56,32 +50,6 @@
 
 - name: Suppresion de l'archive de GLPI
   ansible.builtin.file:
-    path: /tmp/glpi-10.0.10.tgz 
-    state: absent  
+    path: /tmp/glpi-10.0.10.tgz
+    state: absent
   become: yes
-
-- name: Création d'un répertoire pour les paires de clés et les certificats TLS
-  ansible.builtin.file:
-    path: /etc/ssl/csr
-    state: directory
-    mode: '0755'
-
-- name: Génération d'une clé RSA pour le certificat TLS
-  community.crypto.openssl_privatekey:
-    path: /etc/ssl/private/glpi.pem"
-
-- name: Génération d'un certificat OpenSSL
-  community.crypto.openssl_csr:
-    path: /etc/ssl/csr/glpi.csr
-    privatekey_path: /etc/ssl/private/glpi.pem"
-    common_name: "www.{{ client_url }}.com"
-    country_name: FR
-    organization_name: "ADRAR NUMERIQUE"
-    email_address: admin@adrar-numerique.lan
-
-- name: Génération d'uun certificat OpenSSL autosigné
-  community.crypto.x509_certificate:
-    path: "/etc/ssl/csr/glpi.crt"
-    privatekey_path: "/etc/ssl/csr/glpi.pem"
-    csr_path: "/etc/ssl/csr/glpi.csr"
-    provider: selfsigned

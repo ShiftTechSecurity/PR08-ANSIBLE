@@ -1,4 +1,5 @@
 client_name: "entreprise1"
 client_username: "client1"
 client_password: "client1"
+client_email: "client1@clients.lan"
 client_url: "client1.glpi-server.lan"

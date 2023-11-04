@@ -12,6 +12,14 @@
     state: present
   become: yes
 
+- name: Installation modules python pour gestion MySQL
+  ansible.builtin.apt:
+    name:
+      - python3-mysqldb
+      - python3-pymysql
+    state: present
+  become: yes
+
 - name: Installation des services "PHP"
   ansible.builtin.apt:
     name:

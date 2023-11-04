@@ -1,0 +1,52 @@
+---
+# tasks file for /etc/ansible/roles/activate-glpi-web
+- name: Création d'un répertoire pour les paires de clés et les certificats TLS
+  ansible.builtin.file:
+    path: "/etc/tls/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - csr
+    - cert
+    - private
+  become: yes
+
+- name: Génération d'une clé RSA pour le certificat TLS
+  community.crypto.openssl_privatekey:
+    path: "/etc/tls/private/glpi.pem"
+  become: yes
+
+- name: Génération d'un certificat OpenSSL
+  community.crypto.openssl_csr:
+    path: "/etc/tls/csr/glpi.csr"
+    privatekey_path: "/etc/tls/private/glpi.pem"
+    common_name: "www.{{ client_url }}.com"
+    organization_name: "ADRAR NUMERIQUE"
+    country_name: "FR"
+    email_address: "admin@adrar-numerique.lan"
+  become: yes
+
+- name: Génération d'un certificat OpenSSL autosigné
+  community.crypto.x509_certificate:
+    path: "/etc/tls/cert/glpi.crt"
+    privatekey_path: "/etc/tls/private/glpi.pem"
+    csr_path: "/etc/tls/csr/glpi.csr"
+    provider: selfsigned
+  become: yes
+
+- name: Copie du template "client_url.conf"
+  ansible.builtin.template:
+    src: /etc/ansible/roles/activate-glpi-web/templates/website.conf
+    dest: /etc/apache2/sites-available/{{ client_url }}.conf
+  become: yes
+
+- name: Activation du site web "client_url"
+  ansible.builtin.command:
+    cmd: "a2ensite {{ client_url }}.conf"
+  become: yes
+
+- name: Activation du module SSL de Apache2
+  ansible.builtin.apache2_module:
+    name: ssl
+    state: present
+  notify: restart-apache2
